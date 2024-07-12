@@ -9,7 +9,7 @@ const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
 
   // Send a response message
-  res.end('Hello, World some change hi !\n');
+  res.end('Hello, World some change hi hello !\n');
 });
 
 // Start the server and listen on the defined port
