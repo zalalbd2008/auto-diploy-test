@@ -21,7 +21,7 @@ const server = http.createServer((req, res) => {
           );
 
           exec(
-            'sh /path/to/deploy.sh',
+            'sh deploy.sh',
             (error, stdout, stderr) => {
               if (error) {
                 console.error(`Deployment error: ${error}`);
