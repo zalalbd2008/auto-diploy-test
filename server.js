@@ -1,39 +1,18 @@
-// webhook.js
-const express = require('express');
-const { exec } = require('child_process');
-const bodyParser = require('body-parser');
+const http = require('http');
 
-const app = express();
-const PORT = process.env.PORT || 8080;
+// Define the port the server will listen on
+const PORT = 3000;
 
-app.use(bodyParser.json());
+// Create a server
+const server = http.createServer((req, res) => {
+  // Set the response header content type
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
 
-app.post('/webhook', (req, res) => {
-  // Ensure the request is from GitHub
-  if (req.headers['x-github-event'] === 'push') {
-    console.log(
-      'GitHub push event received, starting deployment...'
-    );
-
-    // Run your deployment script
-    exec(
-      'sh /root/auto-diploy-test/deploy.sh',
-      (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Deployment error: ${error}`);
-          return;
-        }
-        console.log(`Deployment stdout: ${stdout}`);
-        console.error(`Deployment stderr: ${stderr}`);
-      }
-    );
-
-    res.status(200).send('Deployment initiated');
-  } else {
-    res.status(400).send('Invalid event');
-  }
+  // Send a response message
+  res.end('Hello, World some change hi !\n');
 });
 
-app.listen(PORT, () => {
-  console.log(`Webhook listener running on port ${PORT}`);
+// Start the server and listen on the defined port
+server.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
 });

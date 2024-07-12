@@ -1,66 +1,39 @@
-const http = require('http');
+// webhook.js
+const express = require('express');
 const { exec } = require('child_process');
-const PORT = process.env.PORT || 8081;
+const bodyParser = require('body-parser');
 
-const server = http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/webhook') {
-    let body = '';
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-    req.on('data', chunk => {
-      body += chunk.toString();
-    });
+app.use(bodyParser.json());
 
-    req.on('end', () => {
-      try {
-        const jsonBody = JSON.parse(body);
-        const githubEvent = req.headers['x-github-event'];
+app.post('/webhook', (req, res) => {
+  // Ensure the request is from GitHub
+  if (req.headers['x-github-event'] === 'push') {
+    console.log(
+      'GitHub push event received, starting deployment...'
+    );
 
-        if (githubEvent === 'push') {
-          console.log(
-            'GitHub push event received, starting deployment...'
-          );
-
-          exec(
-            'sh deploy.sh',
-            (error, stdout, stderr) => {
-              if (error) {
-                console.error(`Deployment error: ${error}`);
-                res.writeHead(500, {
-                  'Content-Type': 'text/plain',
-                });
-                res.end(
-                  `Deployment error: ${error.message}`
-                );
-                return;
-              }
-
-              console.log(`Deployment stdout: ${stdout}`);
-              console.error(`Deployment stderr: ${stderr}`);
-              res.writeHead(200, {
-                'Content-Type': 'text/plain',
-              });
-              res.end('Deployment initiated');
-            }
-          );
-        } else {
-          res.writeHead(400, {
-            'Content-Type': 'text/plain',
-          });
-          res.end('Invalid event');
+    // Run your deployment script
+    exec(
+      'sh /root/auto-diploy-test/deploy.sh',
+      (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Deployment error: ${error}`);
+          return;
         }
-      } catch (error) {
-        res.writeHead(400, {
-          'Content-Type': 'text/plain',
-        });
-        res.end('Invalid JSON');
+        console.log(`Deployment stdout: ${stdout}`);
+        console.error(`Deployment stderr: ${stderr}`);
       }
-    });
+    );
+
+    res.status(200).send('Deployment initiated');
   } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not found');
+    res.status(400).send('Invalid event');
   }
 });
 
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Webhook listener running on port ${PORT}`);
 });
