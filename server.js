@@ -1,7 +1,7 @@
 const http = require('http');
 
 // Define the port the server will listen on
-const PORT = 3000;
+const PORT = 8080;
 
 // Create a server
 const server = http.createServer((req, res) => {
